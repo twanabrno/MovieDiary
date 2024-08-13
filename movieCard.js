@@ -1,3 +1,4 @@
+// movieCard.js
 export function createMovieCard(movie, isFavorite = false, onFavoriteClick) {
   const movieCard = document.createElement("div");
   movieCard.className = "rounded-lg shadow-lg h-96 overflow-hidden relative";
@@ -34,7 +35,7 @@ export function createMovieCard(movie, isFavorite = false, onFavoriteClick) {
   flexContainer.className = "flex justify-between mb-3";
 
   const rate = document.createElement("p");
-  rate.className= "text-gray-300"
+  rate.className = "text-gray-300";
   rate.textContent = movie.voteAverage.toFixed(1);
 
   const ageRating = document.createElement("p");
@@ -49,17 +50,18 @@ export function createMovieCard(movie, isFavorite = false, onFavoriteClick) {
   const addButton = document.createElement("button");
   addButton.className =
     "backdrop-blur-sm bg-white/30 px-5 rounded-lg hover:bg-white/50";
-  addButton.innerHTML = '<i class="fa-solid fa-plus fa-lg"></i>';
+  addButton.classList.add("favorite-btn");
 
-  if (!isFavorite) {
-    addButton.addEventListener("click", () => {
-      if (onFavoriteClick) {
-        onFavoriteClick(movie);
-      }
-    });
-  } else {
-    addButton.disabled = true;
-  }
+  const icon = document.createElement("i");
+  icon.classList.add("fa-solid", "fa-lg");
+  icon.classList.add(isFavorite ? "fa-minus" : "fa-plus");
+  addButton.appendChild(icon);
+
+  addButton.addEventListener("click", () => {
+    if (onFavoriteClick) {
+      onFavoriteClick(movie);
+    }
+  });
 
   const watchButton = document.createElement("button");
   watchButton.className =
