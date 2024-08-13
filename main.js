@@ -3,9 +3,13 @@ import { createMovieCard } from "./movieCard.js";
 const apiKey = "580efe9393c83028cf01304220c3c1e4";
 const baseURL = "https://api.themoviedb.org/3";
 
-document.addEventListener("DOMContentLoaded", () => {
-  fetchPopularMovies();
-});
+const favorites = JSON.parse(localStorage.getItem("favorites")) || [];
+
+fetchPopularMovies();
+
+function saveFavorites() {
+  localStorage.setItem("favorites", JSON.stringify(favorites));
+}
 
 function fetchPopularMovies() {
   fetch(`${baseURL}/movie/popular?api_key=${apiKey}&language=en-US&page=1`)
@@ -15,23 +19,34 @@ function fetchPopularMovies() {
 
 function displayMovies(movies) {
   const movieGrid = document.getElementById("movieGrid");
-  movieGrid.innerHTML = ""; // Clear previous movies
+  movieGrid.innerHTML = ""; 
 
   movies.forEach((movie) => {
+    const isFavorite = favorites.includes(movie.id);
     const movieData = {
       id: movie.id,
       title: movie.title,
       posterPath: movie.poster_path,
       releaseDate: movie.release_date,
       voteAverage: movie.vote_average,
-      isSeries: false, // Set true if it's a series
-      episodes: movie.episodes || 0,
-      notes: "",
     };
 
-    const movieCard = createMovieCard(movieData, false, addToFavorites);
+    const movieCard = createMovieCard(movieData, isFavorite, toggleFavorite);
     movieGrid.appendChild(movieCard);
   });
 }
 
-function addToFavorites(movie) {}
+function toggleFavorite(movie) {
+  const index = favorites.indexOf(movie.id);
+  if (index === -1) {
+    favorites.push(movie.id);
+  } else {
+    favorites.splice(index, 1);
+  }
+  saveFavorites(); 
+  updateMovieCards();
+}
+
+function updateMovieCards() {
+  fetchPopularMovies();
+}
