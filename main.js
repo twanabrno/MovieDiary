@@ -50,3 +50,58 @@ function toggleFavorite(movie) {
 function updateMovieCards() {
   fetchPopularMovies();
 }
+
+document.getElementById("searchButton").addEventListener("click", handleSearch);
+document.getElementById("closeModal").addEventListener("click", () => {
+  document.getElementById("searchModal").classList.add("hidden");
+});
+
+function handleSearch() {
+  const query = document.getElementById("searchBar").value.trim();
+  if (!query) return;
+
+  fetch(`${baseURL}/search/movie?api_key=${apiKey}&query=${encodeURIComponent(query)}&language=en-US&page=1`)
+    .then((response) => response.json())
+    .then((data) => displaySearchResults(data.results))
+    .catch((error) => {
+      console.error("Error fetching search results:", error);
+      displayFeedback("An error occurred while searching. Please try again.");
+    });
+}
+
+function displaySearchResults(movies) {
+  const searchResults = document.getElementById("searchResults");
+  searchResults.textContent = "";
+
+  if (movies.length === 0) {
+    displayFeedback("No movies found for your search query.");
+    return;
+  }
+
+  movies.forEach((movie) => {
+    const isFavorite = favorites.includes(movie.id);
+    const movieData = {
+      id: movie.id,
+      title: movie.title,
+      posterPath: movie.poster_path,
+      releaseDate: movie.release_date,
+      voteAverage: movie.vote_average,
+    };
+
+    const movieCard = createMovieCard(movieData, isFavorite, toggleFavorite);
+    searchResults.appendChild(movieCard);
+  });
+
+  document.getElementById("searchModal").classList.remove("hidden");
+}
+
+function displayFeedback(message) {
+  const searchResults = document.getElementById("searchResults");
+  searchResults.textContent = message;
+  
+  // Clear any existing classes and then add the desired classes
+  searchResults.classList.remove(...searchResults.classList); // Remove all existing classes
+  searchResults.classList.add("text-center", "text-gray-600");
+
+  document.getElementById("searchModal").classList.remove("hidden");
+}
