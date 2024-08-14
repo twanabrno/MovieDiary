@@ -1,4 +1,3 @@
-// movieCard.js
 export function createMovieCard(movie, isFavorite = false, onFavoriteClick) {
   const movieCard = document.createElement("div");
   movieCard.className = "rounded-lg shadow-lg h-96 overflow-hidden relative";
@@ -53,8 +52,8 @@ export function createMovieCard(movie, isFavorite = false, onFavoriteClick) {
   addButton.classList.add("favorite-btn");
 
   const icon = document.createElement("i");
-  icon.classList.add("fa-solid", "fa-lg");
-  icon.classList.add(isFavorite ? "fa-minus" : "fa-plus");
+  icon.classList.add("fa-lg", "fa-heart", "text-red-500");
+  icon.classList.add(isFavorite ? "fa-solid" : "fa-regular");
   addButton.appendChild(icon);
 
   addButton.addEventListener("click", () => {

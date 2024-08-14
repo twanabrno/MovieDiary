@@ -17,9 +17,34 @@ function fetchPopularMovies() {
     .then((data) => displayMovies(data.results));
 }
 
+function fetchSearchedMovies(query) {
+  const url = `${baseURL}/search/movie?api_key=${apiKey}&language=en-US&query=${encodeURIComponent(
+    query
+  )}&page=1`;
+
+  fetch(url)
+    .then((response) => response.json())
+    .then((data) => displayMovies(data.results));
+}
+
 function displayMovies(movies) {
   const movieGrid = document.getElementById("movieGrid");
-  movieGrid.innerHTML = ""; 
+  movieGrid.innerHTML = "";
+
+  if (movies.length === 0) {
+    const noResultsMessage = document.createElement("p");
+    noResultsMessage.classList.add(
+      "text-white",
+      "flex",
+      "text-3xl",
+      "h-full",
+      "justify-center",
+      "items-center"
+    );
+    noResultsMessage.textContent = "No movies found!";
+    movieGrid.appendChild(noResultsMessage);
+    return;
+  }
 
   movies.forEach((movie) => {
     const isFavorite = favorites.includes(movie.id);
@@ -43,10 +68,36 @@ function toggleFavorite(movie) {
   } else {
     favorites.splice(index, 1);
   }
-  saveFavorites(); 
+  saveFavorites();
   updateMovieCards();
 }
 
 function updateMovieCards() {
-  fetchPopularMovies();
+  const query = document.getElementById("searchBar").value.trim();
+  if (query) {
+    fetchSearchedMovies(query);
+  } else {
+    fetchPopularMovies();
+  }
 }
+
+function debounce(func, delay) {
+  let timeout;
+  return function (...args) {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func.apply(this, args), delay);
+  };
+}
+
+const debouncedFetchMovies = debounce((query) => {
+  if (query) {
+    fetchSearchedMovies(query);
+  } else {
+    fetchPopularMovies();
+  }
+}, 500);
+
+document.getElementById("searchBar").addEventListener("input", (event) => {
+  const query = event.target.value.trim();
+  debouncedFetchMovies(query);
+});
