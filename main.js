@@ -101,3 +101,4 @@ document.getElementById("searchBar").addEventListener("input", (event) => {
   const query = event.target.value.trim();
   debouncedFetchMovies(query);
 });
+
