@@ -71,11 +71,16 @@ function toggleFavorite(movie) {
   saveFavorites();
   updateMovieCards();
 }
-
 function updateMovieCards() {
-  const query = document.getElementById("searchBar").value.trim();
-  if (query) {
-    fetchSearchedMovies(query);
+  const searchInput = document.getElementById("search");
+
+  if (searchInput) {
+    const query = searchInput.value.trim();
+    if (query) {
+      fetchSearchedMovies(query);
+    } else {
+      fetchPopularMovies();
+    }
   } else {
     fetchPopularMovies();
   }
@@ -98,7 +103,7 @@ const debouncedFetchMovies = debounce((query) => {
 }, 500);
 
 document.addEventListener("DOMContentLoaded", () => {
-  const searchInput = document.getElementById("search-navbar");
+  const searchInput = document.getElementById("search");
   if (searchInput) {
     searchInput.addEventListener("input", (event) => {
       const query = event.target.value.trim();
