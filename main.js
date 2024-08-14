@@ -2,10 +2,9 @@ import { createMovieCard } from "./movieCard.js";
 
 const apiKey = "580efe9393c83028cf01304220c3c1e4";
 const baseURL = "https://api.themoviedb.org/3";
-const favorites = JSON.parse(localStorage.getItem("favorites")) || [];
-let debounceTimeout;
 
-// Initial fetch for popular movies
+const favorites = JSON.parse(localStorage.getItem("favorites")) || [];
+
 fetchPopularMovies();
 
 function saveFavorites() {
@@ -15,11 +14,17 @@ function saveFavorites() {
 function fetchPopularMovies() {
   fetch(`${baseURL}/movie/popular?api_key=${apiKey}&language=en-US&page=1`)
     .then((response) => response.json())
-    .then((data) => displayMovies(data.results))
-    .catch((error) => {
-      console.error("Error fetching popular movies:", error);
-      displayFeedback("An error occurred while loading movies. Please try again.");
-    });
+    .then((data) => displayMovies(data.results));
+}
+
+function fetchSearchedMovies(query) {
+  const url = `${baseURL}/search/movie?api_key=${apiKey}&language=en-US&query=${encodeURIComponent(
+    query
+  )}&page=1`;
+
+  fetch(url)
+    .then((response) => response.json())
+    .then((data) => displayMovies(data.results));
 }
 
 function displayMovies(movies) {
@@ -27,7 +32,17 @@ function displayMovies(movies) {
   movieGrid.innerHTML = "";
 
   if (movies.length === 0) {
-    displayFeedback("No movies found.");
+    const noResultsMessage = document.createElement("p");
+    noResultsMessage.classList.add(
+      "text-white",
+      "flex",
+      "text-3xl",
+      "h-full",
+      "justify-center",
+      "items-center"
+    );
+    noResultsMessage.textContent = "No movies found!";
+    movieGrid.appendChild(noResultsMessage);
     return;
   }
 
@@ -58,39 +73,32 @@ function toggleFavorite(movie) {
 }
 
 function updateMovieCards() {
-  fetchPopularMovies();
+  const query = document.getElementById("searchBar").value.trim();
+  if (query) {
+    fetchSearchedMovies(query);
+  } else {
+    fetchPopularMovies();
+  }
 }
 
-// Secure Search Function with Debouncing
-document.getElementById("search-navbar").addEventListener("input", (event) => {
-  clearTimeout(debounceTimeout);
+function debounce(func, delay) {
+  let timeout;
+  return function (...args) {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func.apply(this, args), delay);
+  };
+}
 
-  const query = event.target.value.trim();
-
-  if (query.length < 3) {
-    return; // Skip searching if the query is too short
+const debouncedFetchMovies = debounce((query) => {
+  if (query) {
+    fetchSearchedMovies(query);
+  } else {
+    fetchPopularMovies();
   }
+}, 500);
 
-  debounceTimeout = setTimeout(() => {
-    searchMovies(query);
-  }, 300); // Debounce delay of 300ms
+document.getElementById("searchBar").addEventListener("input", (event) => {
+  const query = event.target.value.trim();
+  debouncedFetchMovies(query);
 });
 
-function searchMovies(query) {
-  const encodedQuery = encodeURIComponent(query);
-
-  fetch(`${baseURL}/search/movie?api_key=${apiKey}&query=${encodedQuery}&language=en-US&page=1`)
-    .then((response) => response.json())
-    .then((data) => displayMovies(data.results))
-    .catch((error) => {
-      console.error("Error fetching search results:", error);
-      displayFeedback("An error occurred while searching. Please try again.");
-    });
-}
-
-function displayFeedback(message) {
-  const movieGrid = document.getElementById("movieGrid");
-  movieGrid.textContent = message;
-  movieGrid.classList.remove(...movieGrid.classList);
-  movieGrid.classList.add("text-center", "text-gray-600");
-}
