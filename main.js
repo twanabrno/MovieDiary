@@ -97,8 +97,12 @@ const debouncedFetchMovies = debounce((query) => {
   }
 }, 500);
 
-document.getElementById("searchBar").addEventListener("input", (event) => {
-  const query = event.target.value.trim();
-  debouncedFetchMovies(query);
+document.addEventListener("DOMContentLoaded", () => {
+  const searchInput = document.getElementById("search-navbar");
+  if (searchInput) {
+    searchInput.addEventListener("input", (event) => {
+      const query = event.target.value.trim();
+      debouncedFetchMovies(query);
+    });
+  }
 });
-
