@@ -63,14 +63,27 @@ function displayMovies(movies) {
 
 function toggleFavorite(movie) {
   const index = favorites.indexOf(movie.id);
+  let allFavoriteMovies =
+    JSON.parse(localStorage.getItem("favoriteMovies")) || [];
+
   if (index === -1) {
     favorites.push(movie.id);
+
+    const movieExists = allFavoriteMovies.some((m) => m.id === movie.id);
+    if (!movieExists) {
+      allFavoriteMovies.push(movie);
+    }
   } else {
     favorites.splice(index, 1);
+    allFavoriteMovies = allFavoriteMovies.filter((m) => m.id !== movie.id);
   }
-  saveFavorites();
+
+  localStorage.setItem("favorites", JSON.stringify(favorites));
+  localStorage.setItem("favoriteMovies", JSON.stringify(allFavoriteMovies));
+
   updateMovieCards();
 }
+
 function updateMovieCards() {
   const searchInput = document.getElementById("search");
 
