@@ -4,46 +4,85 @@ const apiKey = "580efe9393c83028cf01304220c3c1e4";
 const baseURL = "https://api.themoviedb.org/3";
 
 const favorites = JSON.parse(localStorage.getItem("favorites")) || [];
+let currentPagePopular = 1;
+let currentPageSearch = 1;
+let isFetching = false;
+let isSearchMode = false;
+let searchQuery = "";
 
-fetchPopularMovies();
+document.addEventListener("DOMContentLoaded", () => {
+  fetchPopularMovies(currentPagePopular);
 
-function saveFavorites() {
-  localStorage.setItem("favorites", JSON.stringify(favorites));
-}
+  window.addEventListener("scroll", () => {
+    if (!isSearchMode) {
+      if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 100) {
+        currentPagePopular++;
+        fetchPopularMovies(currentPagePopular);
+      }
+    } else {
+      if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 100) {
+        currentPageSearch++;
+        fetchSearchedMovies(searchQuery, currentPageSearch);
+      }
+    }
+  });
 
-function fetchPopularMovies() {
-  fetch(`${baseURL}/movie/popular?api_key=${apiKey}&language=en-US&page=1`)
+  const searchInput = document.getElementById("search");
+  if (searchInput) {
+    searchInput.addEventListener("input", (event) => {
+      searchQuery = event.target.value.trim();
+      if (searchQuery) {
+        isSearchMode = true;
+        currentPageSearch = 1; 
+        debouncedFetchMovies(searchQuery); 
+      } else {
+        isSearchMode = false;
+        currentPagePopular = 1; 
+        fetchPopularMovies(currentPagePopular, true); 
+      }
+    });
+  }
+});
+
+function fetchPopularMovies(page = 1, resetGrid = false) {
+  if (isFetching) return;
+  isFetching = true;
+
+  fetch(`${baseURL}/movie/popular?api_key=${apiKey}&language=en-US&page=${page}`)
     .then((response) => response.json())
-    .then((data) => displayMovies(data.results));
+    .then((data) => {
+      displayMovies(data.results, resetGrid);
+      isFetching = false;
+    })
+    .catch(() => {
+      isFetching = false;
+    });
 }
 
-function fetchSearchedMovies(query) {
+function fetchSearchedMovies(query, page = 1, resetGrid = false) {
   const url = `${baseURL}/search/movie?api_key=${apiKey}&language=en-US&query=${encodeURIComponent(
     query
-  )}&page=1`;
+  )}&page=${page}`;
+
+  if (isFetching) return;
+  isFetching = true;
 
   fetch(url)
     .then((response) => response.json())
-    .then((data) => displayMovies(data.results));
+    .then((data) => {
+      displayMovies(data.results, resetGrid);
+      isFetching = false;
+    })
+    .catch(() => {
+      isFetching = false;
+    });
 }
 
-function displayMovies(movies) {
+function displayMovies(movies, resetGrid = false) {
   const movieGrid = document.getElementById("movieGrid");
-  movieGrid.innerHTML = "";
 
-  if (movies.length === 0) {
-    const noResultsMessage = document.createElement("p");
-    noResultsMessage.classList.add(
-      "text-white",
-      "flex",
-      "text-3xl",
-      "h-full",
-      "justify-center",
-      "items-center"
-    );
-    noResultsMessage.textContent = "No movies found!";
-    movieGrid.appendChild(noResultsMessage);
-    return;
+  if (resetGrid) {
+    movieGrid.innerHTML = ""; 
   }
 
   movies.forEach((movie) => {
@@ -63,8 +102,7 @@ function displayMovies(movies) {
 
 function toggleFavorite(movie) {
   const index = favorites.indexOf(movie.id);
-  let allFavoriteMovies =
-    JSON.parse(localStorage.getItem("favoriteMovies")) || [];
+  let allFavoriteMovies = JSON.parse(localStorage.getItem("favoriteMovies")) || [];
 
   if (index === -1) {
     favorites.push(movie.id);
@@ -75,6 +113,7 @@ function toggleFavorite(movie) {
     }
   } else {
     favorites.splice(index, 1);
+
     allFavoriteMovies = allFavoriteMovies.filter((m) => m.id !== movie.id);
   }
 
@@ -85,17 +124,10 @@ function toggleFavorite(movie) {
 }
 
 function updateMovieCards() {
-  const searchInput = document.getElementById("search");
-
-  if (searchInput) {
-    const query = searchInput.value.trim();
-    if (query) {
-      fetchSearchedMovies(query);
-    } else {
-      fetchPopularMovies();
-    }
+  if (isSearchMode) {
+    fetchSearchedMovies(searchQuery, currentPageSearch);
   } else {
-    fetchPopularMovies();
+    fetchPopularMovies(currentPagePopular);
   }
 }
 
@@ -109,18 +141,8 @@ function debounce(func, delay) {
 
 const debouncedFetchMovies = debounce((query) => {
   if (query) {
-    fetchSearchedMovies(query);
+    fetchSearchedMovies(query, 1, true); 
   } else {
-    fetchPopularMovies();
+    fetchPopularMovies(1, true); 
   }
 }, 500);
-
-document.addEventListener("DOMContentLoaded", () => {
-  const searchInput = document.getElementById("search");
-  if (searchInput) {
-    searchInput.addEventListener("input", (event) => {
-      const query = event.target.value.trim();
-      debouncedFetchMovies(query);
-    });
-  }
-});
