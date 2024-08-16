@@ -8,6 +8,7 @@ let currentPagePopular = 1;
 let currentPageSearch = 1;
 let isFetching = false;
 let isSearchMode = false;
+
 let searchQuery = "";
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -112,7 +113,6 @@ function toggleFavorite(movie, iconElement) {
       allFavoriteMovies.push(movie);
     }
 
-    // Update icon to solid (favorited)
     iconElement.classList.remove("fa-regular");
     iconElement.classList.add("fa-solid");
   } else {
@@ -120,7 +120,6 @@ function toggleFavorite(movie, iconElement) {
 
     allFavoriteMovies = allFavoriteMovies.filter((m) => m.id !== movie.id);
 
-    // Update icon to regular (not favorited)
     iconElement.classList.remove("fa-solid");
     iconElement.classList.add("fa-regular");
   }
