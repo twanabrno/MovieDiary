@@ -56,11 +56,11 @@ export function createMovieCard(movie, isFavorite = false, onFavoriteClick) {
   icon.classList.add(isFavorite ? "fa-solid" : "fa-regular");
   addButton.appendChild(icon);
 
-  addButton.addEventListener("click", () => {
-    if (onFavoriteClick) {
-      onFavoriteClick(movie);
-    }
-  });
+addButton.addEventListener("click", () => {
+  if (onFavoriteClick) {
+    onFavoriteClick(movie, icon); // Pass the icon element
+  }
+});
 
   const watchButton = document.createElement("button");
   watchButton.className =
