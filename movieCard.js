@@ -56,16 +56,20 @@ export function createMovieCard(movie, isFavorite = false, onFavoriteClick) {
   icon.classList.add(isFavorite ? "fa-solid" : "fa-regular");
   addButton.appendChild(icon);
 
-addButton.addEventListener("click", () => {
-  if (onFavoriteClick) {
-    onFavoriteClick(movie, icon); // Pass the icon element
-  }
-});
+  addButton.addEventListener("click", () => {
+    if (onFavoriteClick) {
+      onFavoriteClick(movie, icon);
+    }
+  });
 
+  
   const watchButton = document.createElement("button");
   watchButton.className =
-    "bg-[#00b9ae] rounded-lg grow bg-opacity-90 hover:bg-opacity-100";
+  "bg-[#00b9ae] rounded-lg grow bg-opacity-90 hover:bg-opacity-100";
   watchButton.textContent = "Watch";
+  watchButton.addEventListener("click", () => {
+    window.location.href = `movieDetails.html?id=${movie.id}`;
+  });
 
   buttonContainer.appendChild(addButton);
   buttonContainer.appendChild(watchButton);
