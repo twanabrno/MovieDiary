@@ -100,7 +100,7 @@ function displayMovies(movies, resetGrid = false) {
   });
 }
 
-function toggleFavorite(movie) {
+function toggleFavorite(movie, iconElement) {
   const index = favorites.indexOf(movie.id);
   let allFavoriteMovies = JSON.parse(localStorage.getItem("favoriteMovies")) || [];
 
@@ -111,16 +111,22 @@ function toggleFavorite(movie) {
     if (!movieExists) {
       allFavoriteMovies.push(movie);
     }
+
+    // Update icon to solid (favorited)
+    iconElement.classList.remove("fa-regular");
+    iconElement.classList.add("fa-solid");
   } else {
     favorites.splice(index, 1);
 
     allFavoriteMovies = allFavoriteMovies.filter((m) => m.id !== movie.id);
+
+    // Update icon to regular (not favorited)
+    iconElement.classList.remove("fa-solid");
+    iconElement.classList.add("fa-regular");
   }
 
   localStorage.setItem("favorites", JSON.stringify(favorites));
   localStorage.setItem("favoriteMovies", JSON.stringify(allFavoriteMovies));
-
-  updateMovieCards();
 }
 
 function updateMovieCards() {
