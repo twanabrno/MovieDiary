@@ -16,12 +16,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
   window.addEventListener("scroll", () => {
     if (!isSearchMode) {
-      if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 100) {
+      if (
+        window.innerHeight + window.scrollY >=
+        document.body.offsetHeight - 100
+      ) {
         currentPagePopular++;
         fetchPopularMovies(currentPagePopular);
       }
     } else {
-      if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 100) {
+      if (
+        window.innerHeight + window.scrollY >=
+        document.body.offsetHeight - 100
+      ) {
         currentPageSearch++;
         fetchSearchedMovies(searchQuery, currentPageSearch);
       }
@@ -34,12 +40,12 @@ document.addEventListener("DOMContentLoaded", () => {
       searchQuery = event.target.value.trim();
       if (searchQuery) {
         isSearchMode = true;
-        currentPageSearch = 1; 
-        debouncedFetchMovies(searchQuery); 
+        currentPageSearch = 1;
+        debouncedFetchMovies(searchQuery);
       } else {
         isSearchMode = false;
-        currentPagePopular = 1; 
-        fetchPopularMovies(currentPagePopular, true); 
+        currentPagePopular = 1;
+        fetchPopularMovies(currentPagePopular, true);
       }
     });
   }
@@ -49,7 +55,9 @@ function fetchPopularMovies(page = 1, resetGrid = false) {
   if (isFetching) return;
   isFetching = true;
 
-  fetch(`${baseURL}/movie/popular?api_key=${apiKey}&language=en-US&page=${page}`)
+  fetch(
+    `${baseURL}/movie/popular?api_key=${apiKey}&language=en-US&page=${page}`
+  )
     .then((response) => response.json())
     .then((data) => {
       displayMovies(data.results, resetGrid);
@@ -83,27 +91,55 @@ function displayMovies(movies, resetGrid = false) {
   const movieGrid = document.getElementById("movieGrid");
 
   if (resetGrid) {
-    movieGrid.innerHTML = ""; 
+    movieGrid.innerHTML = ""; // Clear the grid content
   }
 
-  movies.forEach((movie) => {
-    const isFavorite = favorites.includes(movie.id);
-    const movieData = {
-      id: movie.id,
-      title: movie.title,
-      posterPath: movie.poster_path,
-      releaseDate: movie.release_date,
-      voteAverage: movie.vote_average,
-    };
+  if (movies.length === 0) {
+    movieGrid.classList.remove("grid");
+    movieGrid.classList.add("flex", "justify-center", "items-center");
+    if (resetGrid) {
+      const noResultsMessage = document.createElement("p");
+      noResultsMessage.classList.add("text-white", "text-3xl", "h-full");
+      noResultsMessage.id = "no-results-message"; // Add an ID for easy reference
+      if (isSearchMode) {
+        noResultsMessage.textContent = searchQuery
+          ? `No results found for "${searchQuery}"`
+          : "No results found!";
+      } else {
+        noResultsMessage.textContent = "No Popular Movies Found!";
+      }
+      movieGrid.innerHTML = ""; // Clear the grid
+      movieGrid.appendChild(noResultsMessage); // Append the message
+    }
+    return;
+  } else {
+    movieGrid.classList.remove("flex", "justify-center", "items-center");
+    movieGrid.classList.add("grid");
+    const existingMessage = document.getElementById("no-results-message");
+    if (existingMessage) {
+      existingMessage.remove();
+    }
 
-    const movieCard = createMovieCard(movieData, isFavorite, toggleFavorite);
-    movieGrid.appendChild(movieCard);
-  });
+    movies.forEach((movie) => {
+      const isFavorite = favorites.includes(movie.id);
+      const movieData = {
+        id: movie.id,
+        title: movie.title,
+        posterPath: movie.poster_path,
+        releaseDate: movie.release_date,
+        voteAverage: movie.vote_average,
+      };
+
+      const movieCard = createMovieCard(movieData, isFavorite, toggleFavorite);
+      movieGrid.appendChild(movieCard);
+    });
+  }
 }
 
 function toggleFavorite(movie, iconElement) {
   const index = favorites.indexOf(movie.id);
-  let allFavoriteMovies = JSON.parse(localStorage.getItem("favoriteMovies")) || [];
+  let allFavoriteMovies =
+    JSON.parse(localStorage.getItem("favoriteMovies")) || [];
 
   if (index === -1) {
     favorites.push(movie.id);
@@ -146,8 +182,8 @@ function debounce(func, delay) {
 
 const debouncedFetchMovies = debounce((query) => {
   if (query) {
-    fetchSearchedMovies(query, 1, true); 
+    fetchSearchedMovies(query, 1, true);
   } else {
-    fetchPopularMovies(1, true); 
+    fetchPopularMovies(1, true);
   }
 }, 500);
