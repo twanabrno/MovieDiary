@@ -62,10 +62,9 @@ export function createMovieCard(movie, isFavorite = false, onFavoriteClick) {
     }
   });
 
-  
   const watchButton = document.createElement("button");
   watchButton.className =
-  "bg-[#00b9ae] rounded-lg grow bg-opacity-90 hover:bg-opacity-100";
+    "bg-[#00b9ae] rounded-lg grow bg-opacity-90 hover:bg-opacity-100";
   watchButton.textContent = "Watch";
   watchButton.addEventListener("click", () => {
     window.location.href = `movieDetails.html?id=${movie.id}`;
