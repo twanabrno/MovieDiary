@@ -3,8 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Movie Diary - Popular</title>
-    <link rel="icon" type="image/*" href="./imgs/logo.svg" />
+    <title>Movie Diary</title>
+    <link rel="icon" type="image/*" href="imgs/logo.png" />
     <script src="https://cdn.tailwindcss.com"></script>
     <link
       rel="stylesheet"
@@ -15,6 +15,9 @@
   <body class="bg-[#16181E] px-[5%]">
     <header class="flex justify-between items-center text-white h-20">
       <nav class="flex gap-6 font-semibold">
+        <a href="index.html">
+          <img src="imgs/logo.png" class="w-10" alt="Movie Diary" />
+        </a>
         <a
           href="index.html"
           class="border-b-2 border-transparent py-2 hover:text-[#00b9ae] hover:border-[#00b9ae]"
@@ -27,8 +30,10 @@
         >
       </nav>
     </header>
-    <div id="movieDetails" class="flex flex-wrap md: flex-nowrap gap-6 mt-5">
-    </div>
+    <div
+      id="movieDetails"
+      class="flex flex-wrap md: flex-nowrap gap-6 mt-5"
+    ></div>
     <script src="movieDetails.js" type="module"></script>
   </body>
 </html>
