@@ -1,4 +1,5 @@
 import { createMovieCard } from "./movieCard.js";
+import { debounce, displayNoResults, updateClassList } from "./utils.js";
 
 const apiKey = "580efe9393c83028cf01304220c3c1e4";
 const baseURL = "https://api.themoviedb.org/3";
@@ -16,18 +17,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
   window.addEventListener("scroll", () => {
     if (!isSearchMode) {
-      if (
-        window.innerHeight + window.scrollY >=
-        document.body.offsetHeight - 100
-      ) {
+      if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 100) {
         currentPagePopular++;
         fetchPopularMovies(currentPagePopular);
       }
     } else {
-      if (
-        window.innerHeight + window.scrollY >=
-        document.body.offsetHeight - 100
-      ) {
+      if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 100) {
         currentPageSearch++;
         fetchSearchedMovies(searchQuery, currentPageSearch);
       }
@@ -55,9 +50,7 @@ function fetchPopularMovies(page = 1, resetGrid = false) {
   if (isFetching) return;
   isFetching = true;
 
-  fetch(
-    `${baseURL}/movie/popular?api_key=${apiKey}&language=en-US&page=${page}`
-  )
+  fetch(`${baseURL}/movie/popular?api_key=${apiKey}&language=en-US&page=${page}`)
     .then((response) => response.json())
     .then((data) => {
       displayMovies(data.results, resetGrid);
@@ -69,9 +62,7 @@ function fetchPopularMovies(page = 1, resetGrid = false) {
 }
 
 function fetchSearchedMovies(query, page = 1, resetGrid = false) {
-  const url = `${baseURL}/search/movie?api_key=${apiKey}&language=en-US&query=${encodeURIComponent(
-    query
-  )}&page=${page}`;
+  const url = `${baseURL}/search/movie?api_key=${apiKey}&language=en-US&query=${encodeURIComponent(query)}&page=${page}`;
 
   if (isFetching) return;
   isFetching = true;
@@ -91,30 +82,14 @@ function displayMovies(movies, resetGrid = false) {
   const movieGrid = document.getElementById("movieGrid");
 
   if (resetGrid) {
-    movieGrid.innerHTML = ""; // Clear the grid content
+    movieGrid.innerHTML = "";
   }
 
   if (movies.length === 0) {
-    movieGrid.classList.remove("grid");
-    movieGrid.classList.add("flex", "justify-center", "items-center");
-    if (resetGrid) {
-      const noResultsMessage = document.createElement("p");
-      noResultsMessage.classList.add("text-white", "text-3xl", "h-full");
-      noResultsMessage.id = "no-results-message"; // Add an ID for easy reference
-      if (isSearchMode) {
-        noResultsMessage.textContent = searchQuery
-          ? `No results found for "${searchQuery}"`
-          : "No results found!";
-      } else {
-        noResultsMessage.textContent = "No Popular Movies Found!";
-      }
-      movieGrid.innerHTML = ""; // Clear the grid
-      movieGrid.appendChild(noResultsMessage); // Append the message
-    }
+    displayNoResults(movieGrid, searchQuery, isSearchMode);
     return;
   } else {
-    movieGrid.classList.remove("flex", "justify-center", "items-center");
-    movieGrid.classList.add("grid");
+    updateClassList(movieGrid, ["flex", "justify-center", "items-center"], ["grid"]);
     const existingMessage = document.getElementById("no-results-message");
     if (existingMessage) {
       existingMessage.remove();
@@ -138,8 +113,7 @@ function displayMovies(movies, resetGrid = false) {
 
 function toggleFavorite(movie, iconElement) {
   const index = favorites.indexOf(movie.id);
-  let allFavoriteMovies =
-    JSON.parse(localStorage.getItem("favoriteMovies")) || [];
+  let allFavoriteMovies = JSON.parse(localStorage.getItem("favoriteMovies")) || [];
 
   if (index === -1) {
     favorites.push(movie.id);
@@ -170,14 +144,6 @@ function updateMovieCards() {
   } else {
     fetchPopularMovies(currentPagePopular);
   }
-}
-
-function debounce(func, delay) {
-  let timeout;
-  return function (...args) {
-    clearTimeout(timeout);
-    timeout = setTimeout(() => func.apply(this, args), delay);
-  };
 }
 
 const debouncedFetchMovies = debounce((query) => {

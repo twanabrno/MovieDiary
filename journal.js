@@ -1,4 +1,5 @@
 import { createMovieCard } from "./movieCard.js";
+import { debounce, displayNoResults } from "./utils.js";
 
 const favorites = JSON.parse(localStorage.getItem("favorites")) || [];
 
@@ -14,20 +15,14 @@ function fetchSearchedMovies(query) {
       favorites.includes(movie.id) &&
       movie.title.toLowerCase().includes(query.toLowerCase())
   );
-  displayMovies(filteredMovies);
+  displayMovies(filteredMovies, query);
 }
 
-function displayMovies(movies) {
+function displayMovies(movies, searchQuery = "") {
   const favoritesGrid = document.getElementById("favoritesGrid");
 
   if (movies.length === 0) {
-    favoritesGrid.classList.remove("grid");
-    favoritesGrid.classList.add("flex", "justify-center", "items-center");
-    favoritesGrid.innerHTML = "";
-    const noResultsMessage = document.createElement("p");
-    noResultsMessage.classList.add("text-white", "text-3xl", "h-full");
-    noResultsMessage.textContent = "No favorite movies found!";
-    favoritesGrid.appendChild(noResultsMessage);
+    displayNoResults(favoritesGrid, searchQuery, true);
   } else {
     favoritesGrid.classList.add("grid");
     favoritesGrid.innerHTML = "";
@@ -38,14 +33,19 @@ function displayMovies(movies) {
     });
   }
 }
+
 function toggleFavorite(movie) {
   const index = favorites.indexOf(movie.id);
-  let allFavoriteMovies =
-    JSON.parse(localStorage.getItem("favoriteMovies")) || [];
+  let allFavoriteMovies = JSON.parse(localStorage.getItem("favoriteMovies")) || [];
 
   if (index !== -1) {
     favorites.splice(index, 1);
     allFavoriteMovies = allFavoriteMovies.filter((m) => m.id !== movie.id);
+  } else {
+    favorites.push(movie.id);
+    if (!allFavoriteMovies.some((m) => m.id === movie.id)) {
+      allFavoriteMovies.push(movie);
+    }
   }
 
   localStorage.setItem("favorites", JSON.stringify(favorites));
@@ -59,14 +59,6 @@ function toggleFavorite(movie) {
   } else {
     fetchFavoriteMovies();
   }
-}
-
-function debounce(func, delay) {
-  let timeout;
-  return function (...args) {
-    clearTimeout(timeout);
-    timeout = setTimeout(() => func.apply(this, args), delay);
-  };
 }
 
 const debouncedSearch = debounce((query) => {
