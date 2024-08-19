@@ -1,6 +1,8 @@
 // movieDetails.js
 document.addEventListener("DOMContentLoaded", () => {
   const urlParams = new URLSearchParams(window.location.search);
+  console.log(urlParams);
+
   const movieId = urlParams.get("id");
 
   if (movieId) {
